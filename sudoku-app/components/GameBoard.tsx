@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import Grid from '../src/components/GameBoard/Grid';
-import NumberPad from '../src/components/GameBoard/NumberPad';
+import Grid from '@/src/components/GameBoard/Grid';
+import NumberPad from '@/src/components/GameBoard/NumberPad';
 
 type GameBoardProps = {
   puzzle: number[][];

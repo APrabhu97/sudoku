@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import GameBoard from './GameBoard';
-import { useSudokuGame } from '../hooks/useSudokuGame';
+import GameBoard from '@/components/GameBoard';
+import { useSudokuGame } from '@/hooks/useSudokuGame';
 
 export default function SudokuGame() {
   const {
