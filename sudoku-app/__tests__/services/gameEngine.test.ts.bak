@@ -1,0 +1,272 @@
+import {
+  generateSudokuPuzzle,
+  isValidMove,
+  generateHint,
+  isBoardComplete,
+  isBoardValid,
+  solveSudoku,
+} from '@services/gameEngine/sudokuGenerator';
+
+describe('Sudoku Game Engine', () => {
+  describe('generateSudokuPuzzle', () => {
+    it('should generate a valid puzzle for easy difficulty', () => {
+      const puzzle = generateSudokuPuzzle('easy');
+
+      expect(puzzle).toHaveLength(9);
+      expect(puzzle[0]).toHaveLength(9);
+      puzzle.forEach((row) => {
+        row.forEach((cell) => {
+          expect(cell).toBeGreaterThanOrEqual(0);
+          expect(cell).toBeLessThanOrEqual(9);
+        });
+      });
+    });
+
+    it('should generate a valid puzzle for medium difficulty', () => {
+      const puzzle = generateSudokuPuzzle('medium');
+      expect(puzzle).toHaveLength(9);
+      expect(isBoardValid(puzzle)).toBe(true);
+    });
+
+    it('should generate a valid puzzle for hard difficulty', () => {
+      const puzzle = generateSudokuPuzzle('hard');
+      expect(puzzle).toHaveLength(9);
+      expect(isBoardValid(puzzle)).toBe(true);
+    });
+
+    it('should generate a valid puzzle for expert difficulty', () => {
+      const puzzle = generateSudokuPuzzle('expert');
+      expect(puzzle).toHaveLength(9);
+      expect(isBoardValid(puzzle)).toBe(true);
+    });
+
+    it('should have correct number of clues for each difficulty', () => {
+      const easyPuzzle = generateSudokuPuzzle('easy');
+      const easyClues = easyPuzzle.flat().filter((cell) => cell !== 0).length;
+      expect(easyClues).toBe(40);
+
+      const mediumPuzzle = generateSudokuPuzzle('medium');
+      const mediumClues = mediumPuzzle.flat().filter((cell) => cell !== 0).length;
+      expect(mediumClues).toBe(32);
+
+      const hardPuzzle = generateSudokuPuzzle('hard');
+      const hardClues = hardPuzzle.flat().filter((cell) => cell !== 0).length;
+      expect(hardClues).toBe(24);
+
+      const expertPuzzle = generateSudokuPuzzle('expert');
+      const expertClues = expertPuzzle.flat().filter((cell) => cell !== 0).length;
+      expect(expertClues).toBe(17);
+    });
+
+    it('should generate different puzzles on multiple calls', () => {
+      const puzzle1 = generateSudokuPuzzle('easy');
+      const puzzle2 = generateSudokuPuzzle('easy');
+
+      const isIdentical =
+        JSON.stringify(puzzle1) === JSON.stringify(puzzle2);
+      expect(isIdentical).toBe(false);
+    });
+  });
+
+  describe('isValidMove', () => {
+    let emptyBoard: number[][];
+
+    beforeEach(() => {
+      emptyBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(0));
+    });
+
+    it('should allow valid moves in empty board', () => {
+      expect(isValidMove(emptyBoard, 0, 0, 5)).toBe(true);
+      expect(isValidMove(emptyBoard, 4, 4, 5)).toBe(true);
+      expect(isValidMove(emptyBoard, 8, 8, 9)).toBe(true);
+    });
+
+    it('should reject duplicate in row', () => {
+      emptyBoard[0][0] = 5;
+      expect(isValidMove(emptyBoard, 0, 1, 5)).toBe(false);
+    });
+
+    it('should reject duplicate in column', () => {
+      emptyBoard[0][0] = 5;
+      expect(isValidMove(emptyBoard, 1, 0, 5)).toBe(false);
+    });
+
+    it('should reject duplicate in 3x3 box', () => {
+      emptyBoard[0][0] = 5;
+      expect(isValidMove(emptyBoard, 1, 1, 5)).toBe(false);
+      expect(isValidMove(emptyBoard, 2, 2, 5)).toBe(false);
+    });
+
+    it('should reject numbers outside 1-9', () => {
+      expect(isValidMove(emptyBoard, 0, 0, 0)).toBe(false);
+      expect(isValidMove(emptyBoard, 0, 0, 10)).toBe(false);
+    });
+
+    it('should allow valid moves across different boxes', () => {
+      emptyBoard[0][0] = 5; // Box 1
+      expect(isValidMove(emptyBoard, 3, 3, 5)).toBe(true); // Box 5
+      expect(isValidMove(emptyBoard, 6, 6, 5)).toBe(true); // Box 9
+    });
+  });
+
+  describe('isBoardComplete', () => {
+    it('should return false for empty board', () => {
+      const emptyBoard = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(0));
+      expect(isBoardComplete(emptyBoard)).toBe(false);
+    });
+
+    it('should return false for partially filled board', () => {
+      const board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(0));
+      board[0][0] = 5;
+      expect(isBoardComplete(board)).toBe(false);
+    });
+
+    it('should return true for completely filled board', () => {
+      const board = Array(9)
+        .fill(null)
+        .map(() => Array(9).fill(1));
+      expect(isBoardComplete(board)).toBe(true);
+    });
+  });
+
+  describe('isBoardValid', () => {
+    let validBoard: number[][];
+
+    beforeEach(() => {
+      validBoard = [
+        [5, 3, 0, 0, 7, 0, 0, 0, 0],
+        [6, 0, 0, 1, 9, 5, 0, 0, 0],
+        [0, 9, 8, 0, 0, 0, 0, 6, 0],
+        [8, 0, 0, 0, 6, 0, 0, 0, 3],
+        [4, 0, 0, 8, 0, 3, 0, 0, 1],
+        [7, 0, 0, 0, 2, 0, 0, 0, 6],
+        [0, 6, 0, 0, 0, 0, 2, 8, 0],
+        [0, 0, 0, 4, 1, 9, 0, 0, 5],
+        [0, 0, 0, 0, 8, 0, 0, 7, 9],
+      ];
+    });
+
+    it('should validate a valid board', () => {
+      expect(isBoardValid(validBoard)).toBe(true);
+    });
+
+    it('should reject board with duplicate in row', () => {
+      validBoard[0][1] = 5; // Duplicate 5 in row 0
+      expect(isBoardValid(validBoard)).toBe(false);
+    });
+
+    it('should reject board with duplicate in column', () => {
+      validBoard[1][0] = 5; // Duplicate 5 in column 0
+      expect(isBoardValid(validBoard)).toBe(false);
+    });
+
+    it('should reject board with duplicate in box', () => {
+      validBoard[1][1] = 5; // Duplicate 5 in top-left 3x3 box
+      expect(isBoardValid(validBoard)).toBe(false);
+    });
+  });
+
+  describe('generateHint', () => {
+    let currentBoard: number[][];
+    let solvedBoard: number[][];
+
+    beforeEach(() => {
+      // Create a simple puzzle
+      solvedBoard = [
+        [5, 3, 4, 6, 7, 8, 9, 1, 2],
+        [6, 7, 2, 1, 9, 5, 3, 4, 8],
+        [1, 9, 8, 3, 4, 2, 5, 6, 7],
+        [8, 5, 9, 7, 6, 1, 4, 2, 3],
+        [4, 2, 6, 8, 5, 3, 7, 9, 1],
+        [7, 1, 3, 9, 2, 4, 8, 5, 6],
+        [9, 6, 1, 5, 3, 7, 2, 8, 4],
+        [2, 8, 7, 4, 1, 9, 6, 3, 5],
+        [3, 4, 5, 2, 8, 6, 1, 7, 9],
+      ];
+
+      currentBoard = solvedBoard.map((row) => [...row]);
+      currentBoard[0][0] = 0; // Remove some numbers
+      currentBoard[0][1] = 0;
+      currentBoard[1][0] = 0;
+    });
+
+    it('should return a hint for empty cells', () => {
+      const hint = generateHint(currentBoard, solvedBoard);
+      expect(hint).not.toBeNull();
+      expect(hint?.row).toBeGreaterThanOrEqual(0);
+      expect(hint?.row).toBeLessThan(9);
+      expect(hint?.col).toBeGreaterThanOrEqual(0);
+      expect(hint?.col).toBeLessThan(9);
+      expect(hint?.value).toBeGreaterThanOrEqual(1);
+      expect(hint?.value).toBeLessThanOrEqual(9);
+    });
+
+    it('should return null when board is complete', () => {
+      const fullBoard = solvedBoard.map((row) => [...row]);
+      const hint = generateHint(fullBoard, solvedBoard);
+      expect(hint).toBeNull();
+    });
+
+    it('should return correct value for hint', () => {
+      const hint = generateHint(currentBoard, solvedBoard);
+      if (hint) {
+        expect(hint.value).toBe(solvedBoard[hint.row][hint.col]);
+      }
+    });
+  });
+
+  describe('solveSudoku', () => {
+    let puzzle: number[][];
+
+    beforeEach(() => {
+      puzzle = [
+        [5, 3, 0, 0, 7, 0, 0, 0, 0],
+        [6, 0, 0, 1, 9, 5, 0, 0, 0],
+        [0, 9, 8, 0, 0, 0, 0, 6, 0],
+        [8, 0, 0, 0, 6, 0, 0, 0, 3],
+        [4, 0, 0, 8, 0, 3, 0, 0, 1],
+        [7, 0, 0, 0, 2, 0, 0, 0, 6],
+        [0, 6, 0, 0, 0, 0, 2, 8, 0],
+        [0, 0, 0, 4, 1, 9, 0, 0, 5],
+        [0, 0, 0, 0, 8, 0, 0, 7, 9],
+      ];
+    });
+
+    it('should solve a valid puzzle', () => {
+      const solution = solveSudoku(puzzle);
+      expect(solution).not.toBeNull();
+    });
+
+    it('should return complete board', () => {
+      const solution = solveSudoku(puzzle);
+      if (solution) {
+        expect(isBoardComplete(solution)).toBe(true);
+      }
+    });
+
+    it('should not modify original puzzle', () => {
+      const originalPuzzle = puzzle.map((row) => [...row]);
+      solveSudoku(puzzle);
+      expect(puzzle).toEqual(originalPuzzle);
+    });
+
+    it('should maintain original clues in solution', () => {
+      const solution = solveSudoku(puzzle);
+      if (solution) {
+        for (let i = 0; i < 9; i++) {
+          for (let j = 0; j < 9; j++) {
+            if (puzzle[i][j] !== 0) {
+              expect(solution[i][j]).toBe(puzzle[i][j]);
+            }
+          }
+        }
+      }
+    });
+  });
+});
