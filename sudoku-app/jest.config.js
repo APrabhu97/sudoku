@@ -13,6 +13,9 @@ module.exports = {
     '^@types/(.*)$': '<rootDir>/src/types/$1',
     '^@constants/(.*)$': '<rootDir>/src/constants/$1',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(react-native|@react-native|react-native-reanimated|expo-haptics|@expo/vector-icons)/)',
+  ],
   testMatch: [
     '**/__tests__/**/*.test.ts',
     '**/__tests__/**/*.test.tsx',
