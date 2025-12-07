@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import type { Difficulty } from '@/types/game';
-import { generateNewPuzzle, resetPuzzle, isPuzzleSolved } from '@/services/gameEngine/gamePuzzleService';
+import type { Difficulty } from '../src/types/game';
+import { generateNewPuzzle, resetPuzzle, isPuzzleSolved } from '../src/services/gameEngine/gamePuzzleService';
 
 type SelectedCell = { row: number; col: number } | null;
 

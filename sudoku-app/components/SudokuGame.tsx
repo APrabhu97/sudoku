@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import type { Difficulty } from '@/types/game';
-import GameBoard from '@/components/GameBoard';
-import { useSudokuGame } from '@/hooks/useSudokuGame';
+import type { Difficulty } from '../src/types/game';
+import GameBoard from './GameBoard';
+import { useSudokuGame } from '../hooks/useSudokuGame';
 
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'expert'];
 
@@ -17,7 +17,7 @@ export default function SudokuGame() {
     handleCellPress,
     handleNumberPress,
     handleNewGame,
-  } = useSudokuGame(selectedDifficulty);
+  } = useSudokuGame('easy');
 
   const [time, setTime] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -48,8 +48,6 @@ export default function SudokuGame() {
     handleNewGame(newDifficulty);
   };
 
-  const capitalizedDifficulty = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
@@ -78,26 +76,15 @@ export default function SudokuGame() {
 
         {/* Game Board with Header */}
         <View style={styles.gridWrapper}>
-          {/* Grid Header */}
-          <View style={styles.gridHeader}>
-            <Text style={styles.difficultyText}>{capitalizedDifficulty}</Text>
-            <View style={styles.timerContainer}>
-              <Text style={styles.timer}>{formatTime(time)}</Text>
-              <Pressable onPress={togglePause} style={styles.pauseButton}>
-                <Ionicons 
-                  name={isPaused ? "play" : "pause"} 
-                  size={20} 
-                  color="#666666" 
-                />
-              </Pressable>
-            </View>
-          </View>
-
           <GameBoard 
             puzzle={puzzle}
             selectedCell={selectedCell}
             onCellPress={handleCellPress}
             onNumberPress={handleNumberPress}
+            difficulty={difficulty}
+            time={time}
+            isPaused={isPaused}
+            onPauseToggle={togglePause}
           />
         </View>
 
@@ -153,34 +140,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   gridWrapper: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
-  },
-  gridHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-    paddingHorizontal: 4,
-  },
-  difficultyText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-  timerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  timer: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#666666',
-  },
-  pauseButton: {
-    padding: 4,
   },
   completionBanner: {
     backgroundColor: '#E8F5E9',
@@ -202,3 +163,4 @@ const styles = StyleSheet.create({
     color: '#2E7D32',
   },
 });
+

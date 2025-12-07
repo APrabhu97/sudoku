@@ -130,8 +130,8 @@ export default function Cell({
           width: size,
           height: size,
           backgroundColor: getBackgroundColor(),
-          borderRightWidth: hideRightBorder ? 0 : 0.5,
-          borderBottomWidth: hideBottomBorder ? 0 : 0.5,
+          borderRightWidth: hideRightBorder ? 0 : 1,
+          borderBottomWidth: hideBottomBorder ? 0 : 1,
         },
         animatedStyle,
       ]}
