@@ -18,9 +18,10 @@ interface NumberPadProps {
 }
 
 const { width: screenWidth } = Dimensions.get('window');
-const padPadding = Spacing.sm * 2; // Reduced padding to use more width
-const numberButtonSize = (screenWidth - padPadding) / 9.2; // Closer spacing for full width
-const actionButtonSize = numberButtonSize * 1.2; // Slightly smaller action buttons
+const padPadding = Spacing.md * 2; // Container padding
+// Calculate button size based on available space (minus gaps between 9 buttons)
+const numberButtonSize = (screenWidth - padPadding * 2) / 8; // Much larger buttons
+const actionButtonSize = numberButtonSize * 0.9; // Action buttons similar size
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -58,7 +59,7 @@ function NumberButton({ number, onPress, remaining, size }: NumberButtonProps) {
         styles.numberButton,
         {
           width: size,
-          height: size * 0.8, // Make buttons slimmer (80% of width)
+          height: size, // Full square buttons
           backgroundColor: '#FFFFFF',
           opacity: isDisabled ? 0.3 : 1,
         },
@@ -76,8 +77,8 @@ function NumberButton({ number, onPress, remaining, size }: NumberButtonProps) {
           styles.numberText,
           {
             color: isDisabled ? Colors.light.textTertiary : '#007AFF',
-            fontSize: size * 0.8, // Even larger font to match screenshot
-            fontWeight: '400', // Lighter weight for cleaner look
+            fontSize: size * 0.95, // Larger font size
+            fontWeight: '300', // Lighter weight for cleaner look
           },
         ]}
       >
@@ -126,8 +127,8 @@ function ActionButton({ icon, onPress, size, active, label }: ActionButtonProps)
         styles.actionButton,
         {
           width: size,
-          height: size * 0.8, // Make action buttons slimmer too
-          backgroundColor: active ? '#007AFF' : '#F5F5F5',
+          height: size, // Full square buttons
+          backgroundColor: active ? '#007AFF' : 'transparent',
         },
         animatedStyle,
       ]}
@@ -209,20 +210,26 @@ export default function NumberPad({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: Spacing.sm, // Reduced horizontal padding for full width
-    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
     backgroundColor: 'transparent',
-    alignItems: 'center', // Center the content
+    width: '100%',
+    alignItems: 'center',
   },
   actionRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between', // Changed from space-evenly to space-between for more spacing
-    marginBottom: Spacing.md, // Reduced margin for tighter layout
-    width: '85%', // Limit width to create space on sides
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+    width: '100%',
+    gap: 4,
   },
   numberRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    gap: 0,
   },
   numberButton: {
     justifyContent: 'center',

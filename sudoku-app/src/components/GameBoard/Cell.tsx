@@ -87,8 +87,8 @@ export default function Cell({
           styles.number,
           {
             color: getTextColor(),
-            fontWeight: state.isGiven ? '700' : '400', // Lighter weight for user input
-            fontSize: size * 0.65, // Larger font
+            fontWeight: '300', // Same light weight as NumberPad for all numbers
+            fontSize: size * 0.95, // Match NumberPad font size
           },
         ]}
       >
@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
   number: {
     textAlign: 'center',
     includeFontPadding: false,
+    lineHeight: undefined, // Reset line height for proper centering
   },
   notesContainer: {
     position: 'absolute',

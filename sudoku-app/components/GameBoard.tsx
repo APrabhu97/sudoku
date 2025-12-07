@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, Text, Pressable } from 'react-native';
+import { View, StyleSheet, Text, Pressable, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Spacing } from '../src/styles/theme';
 import Grid from '../src/components/GameBoard/Grid';
 import NumberPad from '../src/components/GameBoard/NumberPad';
 
@@ -117,13 +118,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
     padding: 12,
+    width: Dimensions.get('window').width - Spacing.md * 2,
+    alignSelf: 'center',
   },
   numberPadContainer: {
     marginTop: 20,
-    width: '100%',
+    width: Dimensions.get('window').width - Spacing.md * 2,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
+    alignSelf: 'center',
   },
 });
 
