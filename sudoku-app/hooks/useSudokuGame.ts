@@ -1,23 +1,27 @@
-import { useState } from 'react';
-
-const INITIAL_PUZZLE = [
-  [5, 3, 0, 0, 7, 0, 0, 0, 0],
-  [6, 0, 0, 1, 9, 5, 0, 0, 0],
-  [0, 9, 8, 0, 0, 0, 0, 6, 0],
-  [8, 0, 0, 0, 6, 0, 0, 0, 3],
-  [4, 0, 0, 8, 0, 3, 0, 0, 1],
-  [7, 0, 0, 0, 2, 0, 0, 0, 6],
-  [0, 6, 0, 0, 0, 0, 2, 8, 0],
-  [0, 0, 0, 4, 1, 9, 0, 0, 5],
-  [0, 0, 0, 0, 8, 0, 0, 7, 9]
-];
+import { useState, useCallback } from 'react';
+import type { Difficulty } from '@/types/game';
+import { generateNewPuzzle, resetPuzzle, isPuzzleSolved } from '@/services/gameEngine/gamePuzzleService';
 
 type SelectedCell = { row: number; col: number } | null;
 
-export function useSudokuGame() {
-  const [puzzle, setPuzzle] = useState(() => 
-    INITIAL_PUZZLE.map(row => [...row])
-  );
+interface GameState {
+  puzzle: number[][];
+  solution: number[][];
+  initialPuzzle: number[][];
+  difficulty: Difficulty;
+}
+
+export function useSudokuGame(initialDifficulty: Difficulty = 'easy') {
+  const [gameState, setGameState] = useState<GameState>(() => {
+    const puzzle = generateNewPuzzle(initialDifficulty);
+    return {
+      puzzle: puzzle.puzzle,
+      solution: puzzle.solution,
+      initialPuzzle: puzzle.initialPuzzle,
+      difficulty: puzzle.difficulty,
+    };
+  });
+
   const [selectedCell, setSelectedCell] = useState<SelectedCell>(null);
 
   const handleCellPress = (row: number, col: number) => {
@@ -26,34 +30,65 @@ export function useSudokuGame() {
 
   const handleNumberPress = (number: number) => {
     if (selectedCell) {
-      const newPuzzle = [...puzzle];
+      const newPuzzle = gameState.puzzle.map(row => [...row]);
       newPuzzle[selectedCell.row][selectedCell.col] = number;
-      setPuzzle(newPuzzle);
+      setGameState(prev => ({
+        ...prev,
+        puzzle: newPuzzle,
+      }));
     }
   };
 
-  const handleNewGame = () => {
-    setPuzzle(INITIAL_PUZZLE.map(row => [...row]));
+  const handleNewGame = useCallback((difficulty: Difficulty = gameState.difficulty) => {
+    const puzzle = generateNewPuzzle(difficulty);
+    setGameState({
+      puzzle: puzzle.puzzle,
+      solution: puzzle.solution,
+      initialPuzzle: puzzle.initialPuzzle,
+      difficulty: puzzle.difficulty,
+    });
     setSelectedCell(null);
-  };
+  }, [gameState.difficulty]);
 
-  const handleHint = () => {
-    // TODO: Implement hint logic
-    console.log('Hint requested');
-  };
+  const handleReset = useCallback(() => {
+    const puzzle = generateNewPuzzle(gameState.difficulty);
+    setGameState({
+      puzzle: puzzle.puzzle,
+      solution: puzzle.solution,
+      initialPuzzle: puzzle.initialPuzzle,
+      difficulty: puzzle.difficulty,
+    });
+    setSelectedCell(null);
+  }, [gameState.difficulty]);
 
-  const handlePause = () => {
-    // TODO: Implement pause logic
-    console.log('Game paused');
-  };
+  const handleClearCell = useCallback(() => {
+    if (selectedCell) {
+      const newPuzzle = gameState.puzzle.map(row => [...row]);
+      const initialValue = gameState.initialPuzzle[selectedCell.row][selectedCell.col];
+      // Only clear if it was empty initially (user-entered)
+      if (initialValue === 0) {
+        newPuzzle[selectedCell.row][selectedCell.col] = 0;
+        setGameState(prev => ({
+          ...prev,
+          puzzle: newPuzzle,
+        }));
+      }
+    }
+  }, [selectedCell, gameState.puzzle, gameState.initialPuzzle]);
+
+  const isGameComplete = isPuzzleSolved(gameState.puzzle, gameState.solution);
 
   return {
-    puzzle,
+    puzzle: gameState.puzzle,
+    solution: gameState.solution,
+    initialPuzzle: gameState.initialPuzzle,
+    difficulty: gameState.difficulty,
     selectedCell,
+    isGameComplete,
     handleCellPress,
     handleNumberPress,
     handleNewGame,
-    handleHint,
-    handlePause
+    handleReset,
+    handleClearCell,
   };
 }
